@@ -1,0 +1,12 @@
+architecture_extraction_agent/
+├── schema.py                 # [Pydantic] Hợp đồng dữ liệu (Node, Edge, Graph)
+├── classifier.py             # [Hàm thuần] Nhận file, trả về loại file (text, image, puml)
+├── extractors/
+│   ├── plantuml_parser.py    # [Hàm thuần] Parse text -> Graph JSON
+│   ├── vision_extractor.py   # [Hàm thuần] Gọi Vision API -> Graph JSON
+│   └── text_extractor.py     # [Hàm thuần] Gọi LLM -> Graph JSON
+├── merger.py                 # [Hàm thuần] Gộp nhiều Graph JSON -> 1 Graph JSON
+├── agent.py                  # [LANGGRAPH] Định nghĩa StateGraph, Nodes, Edges. 
+│                             # Gọi các hàm thuần ở trên.
+├── interface.py              # [MCP / FastAPI] Bọc agent.py để hệ thống ngoài gọi vào
+└── tests/                    # Test các hàm thuần + Test contract của interface

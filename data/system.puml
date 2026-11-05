@@ -1,0 +1,16 @@
+@startuml
+!include <C4/C4_Container>
+
+Person(user, "Khách hàng", "Người mua hàng")
+System_Boundary(ecommerce, "Hệ thống E-commerce") {
+    Container(web_app, "Web App", "React", "Giao diện người dùng")
+    Container(api_gateway, "API Gateway", "Node.js", "Điều phối request")
+    Container(order_service, "Order Service", "Java", "Xử lý đơn hàng")
+    ContainerDb(database, "Database", "PostgreSQL", "Lưu đơn hàng")
+}
+
+Rel(user, web_app, "Sử dụng", "HTTPS")
+Rel(web_app, api_gateway, "Gọi API", "JSON")
+Rel(api_gateway, order_service, "Chuyển tiếp", "gRPC")
+Rel(order_service, database, "Đọc/Ghi", "SQL")
+@enduml
