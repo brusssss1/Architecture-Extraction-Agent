@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
-# 1. SỬA ĐƯỜNG DẪN: File đang ở trong tests/, phải lùi 2 cấp để về thư mục gốc
+# 1. XỬ LÝ ĐƯỜNG DẪN: File đang ở trong tests/, phải lùi 2 cấp để về thư mục gốc
 project_root = Path(__file__).resolve().parent.parent
 
 # 2. THÊM THƯ MỤC GỐC VÀO HỆ THỐNG: Để Python tìm thấy schema.py, agent.py...
@@ -31,23 +31,38 @@ async def main():
     client = create_groq_client(api_key)
     agent = ArchitectureExtractionAgent(client)
     
+    # ========================================================
+    # 🎯 PHẦN ĐỌC FILE TỪ THƯ MỤC DATA
+    # ========================================================
+    puml_path = project_root / "data" / "system.puml"
+    md_path = project_root / "data" / "description.md"
+    
+    # Kiểm tra xem file có tồn tại không trước khi đọc (tránh lỗi sập chương trình)
+    if not puml_path.exists() or not md_path.exists():
+        print(f"❌ LỖI: Không tìm thấy file tại {puml_path} hoặc {md_path}")
+        print("Vui lòng kiểm tra lại xem bạn đã tạo thư mục 'data' và 2 file bên trong chưa.")
+        return
+
+    print(f"📂 Đang đọc dữ liệu từ thư mục data/...")
+    
+    # Đọc nội dung thực tế của file
+    puml_content = puml_path.read_text(encoding='utf-8')
+    md_content = md_path.read_text(encoding='utf-8')
+
+    # Đóng gói vào inputs
     inputs = [
         {
-            "name": "diagram.puml", 
-            "content": '''@startuml
-!include <C4/C4_Container>
-Person(user, "Khách hàng")
-Container(webapp, "WebApp", "React", "Giao diện")
-Rel(user, webapp, "Sử dụng", "HTTPS")
-@enduml''', 
+            "name": "system.puml", 
+            "content": puml_content, 
             "bytes": b""
         },
         {
-            "name": "doc.md", 
-            "content": "Hệ thống có Payment Service viết bằng Java, kết nối database PostgreSQL qua SQL.",
+            "name": "description.md", 
+            "content": md_content, 
             "bytes": b""
         }
     ]
+    # ========================================================
     
     print("⏳ Đang trích xuất kiến trúc (vui lòng đợi gọi API Groq)...")
     result = await agent.run(inputs)
